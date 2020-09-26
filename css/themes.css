@@ -1,0 +1,86 @@
+/**
+ * Themes
+ *
+ * @licstart  The following is the entire license notice for the 
+ *  JavaScript code in this page.
+ *
+ * Copyright (C) 2018  Arthur Malulley B. de O.
+ *
+ *
+ * The JavaScript code in this page is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU
+ * General Public License (GNU GPL) as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version.  The code is distributed WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+ *
+ * As additional permission under GNU GPL version 3 section 7, you
+ * may distribute non-source (e.g., minimized or compacted) forms of
+ * that code without the copy of the GNU GPL normally required by
+ * section 4, provided you include this license notice and a URL
+ * through which recipients can access the Corresponding Source.
+ *
+ * @licend  The above is the entire license notice
+ * for the JavaScript code in this page.
+ *
+ */
+.theme--default {
+    --background-color: #111;
+    --overlay-color: rgba(0, 0, 0, 0.5);
+    --paint-lightest: #fff;
+    --paint-lighter2: #fff;
+    --paint-lighter: #ddd;
+    --paint-light: #808080;
+    --paint-light-fade: rgba(128, 128, 128, 0.25);
+    --paint-dark: #696969;
+    --paint-dark-fade: rgba(105, 105, 105, 0.25);
+    --paint-darker-fade: rgba(40, 40, 40, 0.75);
+    --paint-prime: #CFB53B;
+    --paint-alert: #cc4033;
+    --paint-alert-dark: #4a2826;
+    --conn-color: #d62;
+    --alter-paint: #d62;
+    --alter-paint-light: #FF7C29;
+    --alter-paint-lighter: #ff9f80;
+    --alter-paint2: #547FE8;
+    --trans-paint-light: #6f9db3;
+    --trans-paint-light2: #83abbe;
+    --trans-paint-lighter: #bdd1db;
+    --trans-paint-lightest: #e0eaee;
+    --trans-paint-dark: #48768c;
+    --trans-paint-light-fade: #6f9db340;
+    --border-color: #404040;
+    --trans-border-color: #39525e;
+    --text-color: #fff;
+}
+
+.theme--bright {
+    --background-color: #ededed;
+    --overlay-color: rgba(0, 0, 0, 0.5);
+    --paint-lightest: #a2abc3;
+    --paint-lighter2: #e0e3eb;
+    --paint-lighter: #E4E6E7;
+    --paint-light: #f2f2f8;
+    --paint-light-fade: rgba(242, 244, 247, 0.25);
+    --paint-dark: #fbfbfe;
+    --paint-dark-fade: rgba(224, 229, 238, 0.25);
+    --paint-darker-fade: rgba(62, 63, 65, 0.25);
+    --paint-prime: #b8c8e5;
+    --paint-alert: #a5badf;
+    --paint-alert-dark: #793e3e;
+    --conn-color: #b6c7e5;
+    --alter-paint: #b6c7e5;
+    --alter-paint-light: #cddbee;
+    --trans-paint-light2: #e3e7ed;
+    --alter-paint-lighter: #dbe5f5;
+    --alter-paint2: #547FE8;
+    --trans-paint-light: #ddd;
+    --trans-paint-lighter: #ececec;
+    --trans-paint-lightest: #fff;
+    --trans-paint-dark: #ececec;
+    --trans-paint-light-fade: #dddddd40;
+    --border-color: #939A9F;
+    --trans-border-color: #515151;
+    --text-color: #242729;
+}

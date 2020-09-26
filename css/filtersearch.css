@@ -1,0 +1,214 @@
+/**
+ * Filter Search
+ *
+ * @licstart  The following is the entire license notice for the 
+ *  JavaScript code in this page.
+ *
+ * Copyright (C) 2018  Arthur Malulley B. de O.
+ *
+ *
+ * The JavaScript code in this page is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU
+ * General Public License (GNU GPL) as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version.  The code is distributed WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+ *
+ * As additional permission under GNU GPL version 3 section 7, you
+ * may distribute non-source (e.g., minimized or compacted) forms of
+ * that code without the copy of the GNU GPL normally required by
+ * section 4, provided you include this license notice and a URL
+ * through which recipients can access the Corresponding Source.
+ *
+ * @licend  The above is the entire license notice
+ * for the JavaScript code in this page.
+ *
+ */
+div.filtersearchcontainer {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+div.filtersearchcontainer * {
+    box-sizing: border-box;
+    color: var(--text-color);
+}
+
+div.filtersearchcontainer > div {
+    padding-left: 0.5em;
+}
+
+div.filtersearchcontainer div.searchbar-wrapper {
+    padding: 0;
+    position: relative;
+}
+
+div.filtersearchcontainer input.searchbar {
+    background-position: 10px 12px;
+    background-repeat: no-repeat;
+    background-color: var(--paint-dark);
+    width: 100%;
+    padding: 6px 10px 6px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25em;
+    margin-bottom: 0.5em;
+    font-family: Verdana;
+    font-size: var(--app-font-size);
+}
+
+div.filtersearchcontainer input.searchbar:first-child {
+    padding-right: 30px;
+}
+
+div.filtersearchcontainer input.searchbar.exclude-search {
+    background: var(--paint-alert);
+    border-color: var(--paint-alert-dark);
+}
+
+div.filtersearchcontainer div.exclude-search-container {
+    transition: 0.25s;
+    overflow: hidden;
+    height: 0;
+}
+
+div.filtersearchcontainer div.exclude-search-btn {
+    float: right;
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 6px 10px;
+    margin: 1px;
+}
+
+div.filtersearchcontainer div.exclude-search-btn:hover i {
+    color: var(--paint-alert);
+}
+
+div.filtersearchcontainer input::placeholder {
+    color: var(--text-color);
+    font-family: Verdana;
+    font-size: var(--app-font-size);
+}
+
+div.filtersearchcontainer input:focus {
+    outline-color: var(--alter-paint-light);
+}
+
+div.filtersearchcontainer input::selection {
+    background: var(--alter-paint-lighter);
+}
+
+div.filtersearchcontainer ul {
+    list-style-type: none;
+    padding: 1.5px 0px;
+    margin: 0;
+    overflow-y: auto;
+    background-color: var(--paint-dark);
+    border: 1.5px solid var(--border-color);
+    border-radius: 0.25em;
+}
+
+div.filtersearchcontainer ul::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+    background-color: var(--paint-dark);
+}
+
+div.filtersearchcontainer ul::-webkit-scrollbar-thumb {
+    height: 4px;
+    width: 4px;
+    background-color: var(--border-color);
+}
+
+div.filtersearchcontainer ul::-webkit-scrollbar-corner {
+    background-color: var(--paint-dark);
+}
+
+div.filtersearchcontainer li {
+    white-space: normal;
+}
+
+div.filtersearchcontainer li div {
+    border-top: 1.5px solid var(--border-color);
+    border-bottom: 1.5px solid var(--border-color);
+    margin-top: -1.5px; /* Prevent double borders */
+    background-color: var(--paint-dark);
+    padding: 0.15em 0.5em;
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+}
+
+div.filtersearchcontainer li div.option-disabled {
+    opacity: 0.25;
+}
+
+div.filtersearchcontainer li:hover div {
+    background-color: var(--paint-light);
+}
+
+div.filtersearchcontainer li div.selected {
+    background-color: var(--alter-paint);
+}
+
+div.filtersearchcontainer li:hover div.selected {
+    background-color: var(--alter-paint-light);
+}
+
+div.filtersearchcontainer li:first-of-type div {
+    border-top: none;
+}
+
+div.filtersearchcontainer li:last-of-type div {
+    border-bottom: none;
+}
+
+div.filtersearchcontainer li a:hover:not(.header) {
+    background-color: var(--paint-light);
+}
+
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) {
+    div.filtersearchcontainer input.searchbar,
+    div.filtersearchcontainer div.exclude-search-btn {
+        padding: 12px;
+    }
+
+    div.filtersearchcontainer input.searchbar:first-child {
+        padding-right: 40px;
+    }
+}
+
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) and (orientation : landscape) {
+    div.filtersearchcontainer input.searchbar,
+    div.filtersearchcontainer div.exclude-search-btn {
+        padding: 6px;
+    }
+
+    div.filtersearchcontainer input.searchbar:first-child {
+        padding-right: 30px;
+    }
+}
+
+@media only screen and (max-device-width: 767px) {
+    div.filtersearchcontainer input.searchbar,
+    div.filtersearchcontainer div.exclude-search-btn {
+        padding: 20px;
+    }
+
+    div.filtersearchcontainer input.searchbar:first-child {
+        padding-right: 80px;
+    }
+}
+
+@media only screen and (max-device-width: 767px) and (orientation: landscape) {
+    div.filtersearchcontainer input.searchbar,
+    div.filtersearchcontainer div.exclude-search-btn {
+        padding: 12px;
+    }
+
+    div.filtersearchcontainer input.searchbar:first-child {
+        padding-right: 40px;
+    }
+}

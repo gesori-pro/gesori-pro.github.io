@@ -1,0 +1,125 @@
+/**
+ * Dropdown
+ *
+ * @licstart  The following is the entire license notice for the 
+ *  JavaScript code in this page.
+ *
+ * Copyright (C) 2018  Arthur Malulley B. de O.
+ *
+ *
+ * The JavaScript code in this page is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU
+ * General Public License (GNU GPL) as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version.  The code is distributed WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+ *
+ * As additional permission under GNU GPL version 3 section 7, you
+ * may distribute non-source (e.g., minimized or compacted) forms of
+ * that code without the copy of the GNU GPL normally required by
+ * section 4, provided you include this license notice and a URL
+ * through which recipients can access the Corresponding Source.
+ *
+ * @licend  The above is the entire license notice
+ * for the JavaScript code in this page.
+ *
+ */
+div.dropdown-container {
+    width: 100%;
+    border-radius: 3px;
+    overflow: hidden;
+    background-color: var(--paint-dark);
+    border: solid 1.5px var(--border-color);
+    margin-top: 0.25em;
+}
+
+div.dropdown-container select {
+    width: 100%;
+    font-family: Verdana;
+    font-size: 1em;
+    padding: 0.15em 0.5em;
+    background: transparent;
+    border: 0px solid var(--border-color);
+    color: var(--text-color);
+    text-overflow: ellipsis;
+    outline: none;
+}
+
+div.dropdown-container select option {
+    background-color: var(--paint-dark);
+}
+
+div.dropdown-container.success-rate select {
+    width: 93%;
+}
+
+div.dropdown-container.success-rate:before {
+    background: url("res/successRateIcon.png") no-repeat;
+    position: relative;
+    height: 14px;
+    content: "";
+    left: 5px;
+    display: inline-block;
+    top: 1.2px;
+    width: 14px;
+    background-size: cover;
+    background-position: center center;
+}
+
+div.dropdown-container.equipment-potential select {
+    width: 93%;
+}
+
+div.dropdown-container.equipment-potential:before {
+    background: url("res/equipmentPotentialIcon.png") no-repeat;
+    position: relative;
+    height: 14px;
+    content: "";
+    left: 5px;
+    display: inline-block;
+    top: 1.2px;
+    width: 14px;
+    background-size: cover;
+    background-position: center center;
+}
+
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) {
+    div.dropdown-container.success-rate:before,
+    div.dropdown-container.equipment-potential:before {
+        width: 24px;
+        height: 24px;
+        top: 3px;
+        left: 7px;
+    }
+}
+
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) and (orientation : landscape) {
+    div.dropdown-container.success-rate:before,
+    div.dropdown-container.equipment-potential:before {
+        width: 16px;
+        height: 16px;
+        top: 2px;
+        left: 7px;
+    }
+}
+
+@media only screen and (max-device-width: 767px) {
+    div.dropdown-container.success-rate:before,
+    div.dropdown-container.equipment-potential:before {
+        width: 40px;
+        height: 40px;
+        top: 5px;
+        left: 10px;
+    }
+}
+
+@media only screen and (max-device-width: 767px) and (orientation: landscape) {
+    div.dropdown-container.success-rate:before,
+    div.dropdown-container.equipment-potential:before {
+        width: 24px;
+        height: 24px;
+        top: 3px;
+        left: 7px;
+    }
+}

@@ -1,0 +1,124 @@
+/**
+ * Checkbox
+ *
+ * @licstart  The following is the entire license notice for the 
+ *  JavaScript code in this page.
+ *
+ * Copyright (C) 2018  Arthur Malulley B. de O.
+ *
+ *
+ * The JavaScript code in this page is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU
+ * General Public License (GNU GPL) as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version.  The code is distributed WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+ *
+ * As additional permission under GNU GPL version 3 section 7, you
+ * may distribute non-source (e.g., minimized or compacted) forms of
+ * that code without the copy of the GNU GPL normally required by
+ * section 4, provided you include this license notice and a URL
+ * through which recipients can access the Corresponding Source.
+ *
+ * @licend  The above is the entire license notice
+ * for the JavaScript code in this page.
+ *
+ */
+.checkbox-container {
+    width: 165px;
+    margin: 0 auto;
+}
+
+.checkbox-container.disabled {
+    opacity: 0.5;
+}
+
+.checkbox-holder {
+    position: relative;
+    padding-left: 1.5em;
+    margin: 0.5em;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.checkbox-holder input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Create a custom checkbox */
+.checkbox-holder .checkmark {
+    position: absolute;
+    top: -0.125em;
+    left: -0.125em;
+    height: 1.5em;
+    width: 1.5em;
+    background-color: var(--paint-lighter2);
+    border-radius: 0.25em;
+}
+
+/* On mouse-over, add a grey background color */
+.checkmark-holder:hover input ~ .checkmark {
+    background-color: var(--paint-lighter);
+}
+
+/* When the checkbox is checked, add a blue background */
+.checkmark-holder input:checked ~ .checkmark {
+    background-color: var(--paint-dark);
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkbox-holder .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+/* Show the checkmark when checked */
+.checkbox-holder input:checked ~ .checkmark:after {
+    display: block;
+}
+
+/* Style the checkmark/indicator */
+.checkbox-holder .checkmark:after {
+    left: 0.4em;
+    top: 0.1em;
+    width: 0.5em;
+    height: 0.75em;
+    border: solid var(--paint-lightest);
+    border-width: 0 2px 2px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) {
+    .checkbox-container {
+        width: 262px;
+    }
+}
+
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) and (orientation : landscape) {
+    .checkbox-container {
+        width: 170px;
+    }
+}
+
+@media only screen and (max-device-width: 767px) {
+    .checkbox-container {
+        width: 434px;
+    }
+}
+
+@media only screen and (max-device-width: 767px) and (orientation: landscape) {
+    .checkbox-container {
+        width: 248px;
+    }
+}
