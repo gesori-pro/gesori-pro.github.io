@@ -3,7 +3,7 @@
   # PSO2 Affixing Assistant
   Effortless affixing solutions to PSO2 problems
 
-  ## [Use the Assistant Here](https://focuslite.github.io/PSO2AffixingAssistant/)
+  ## [Use the Assistant Here](https://gesori-pro.github.io/PSO2AffixingAssistant/)
   #### [Like it? Check out my Symbol Art Editor Online here too!](https://www.github.com/malulleybovo/SymbolArtEditorOnline/)
   #### Version 1.1.6
   #### Compliant with version 1.93 of [Arks Layer's Affix Simulator](https://arks-layer.com/abilitysim/)
@@ -59,8 +59,7 @@
   3) Share the link with friends or save it for later.
 
   ### Open the Affixing Formula on Arks Layer's Affix Simulator
-  Probably not necessary, but if it is, then [post an issue here](https://github.com/
-  /PSO2AffixingAssistant/issues) so I can address it.
+  Probably not necessary, but if it is, then [post an issue here](https://github.com/malulleybovo/PSO2AffixingAssistant/issues) so I can address it.
   <br>How it works:
   1) Tap on the *share* button on the sidebar.
   2) Tap on the *Open in Affix Simulator* button on the menu.
