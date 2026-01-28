@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon RPS: Card Battle</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Top Info Bar -->
+        <div class="top-bar">
+            <h1 class="neon-text small">RPS BATTLE</h1>
+            <div id="room-info">Room: <span id="current-room-code" class="highlight">---</span></div>
+        </div>
+
+        <!-- Status & Score -->
+        <div class="scoreboard">
+            <div id="round-display">ROUND 1 / 3</div>
+            <div id="score-display">P1: 0 - P2: 0</div>
+            <div id="status-text">Waiting...</div>
+        </div>
+
+        <!-- Lobby Section -->
+        <div id="lobby-screen" class="screen active">
+            <div class="card">
+                <h2>Game Lobby</h2>
+                <div class="btn-group">
+                    <button id="btn-create" class="neon-btn primary">Create Room</button>
+                    <div class="separator">- OR -</div>
+                    <input type="text" id="join-code" placeholder="Room Code">
+                    <button id="btn-join" class="neon-btn secondary">Join Room</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Section (Top vs Bottom) -->
+        <div id="game-screen" class="screen">
+
+            <!-- OPPONENT ZONE (TOP) -->
+            <div class="zone opponent-zone">
+                <div class="avatar-wrapper">
+                    <div class="avatar p2-color">OPP</div>
+                    <div id="opponent-status">Waiting...</div>
+                </div>
+                <!-- Opponent's Hand (Hidden Cards) -->
+                <div id="opponent-hand" class="hand-container compact">
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                    <div class="card-back"></div>
+                </div>
+            </div>
+
+            <div class="vs-divider">VS</div>
+
+            <!-- PLAYER ZONE (BOTTOM) -->
+            <div class="zone player-zone">
+                <!-- Result Overlay (Appears on top of cards) -->
+                <div id="result-overlay" class="result-msg hidden">WIN!</div>
+
+                <!-- My Hand (Interactive Cards) -->
+                <div id="choice-buttons" class="hand-container">
+                    <!-- Buttons injected by JS -->
+                </div>
+
+                <div class="avatar-wrapper bottom">
+                    <div class="avatar p1-color">YOU</div>
+                    <div id="my-role" class="role-badge">---</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="btn-exit" class="neon-btn danger">Exit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK & Game Logic -->
+    <!-- Note: These match the filenames you uploaded to GitHub -->
+    <script type="module" SRC="fire.js"></script>
+    <script type="module" SRC="game.js"></script>
+
+</body>
+
+</html>
