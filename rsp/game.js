@@ -1,311 +1,274 @@
-import { db, ref, set, onValue, update, get, child } from './fire.js';
+import { db, ref, set, onValue, update, get, remove } from './fire.js';
 
-// Game State
+// State
 let currentRoomId = null;
-let myRole = null; // 'p1' or 'p2'
-let myChoice = null;
-let currentRound = 1;
+let myRole = null;
+let myCards = [];
+let isAnimating = false;
 const MAX_ROUNDS = 3;
 
-// DOM Elements
-const screens = {
-    lobby: document.getElementById('lobby-screen'),
-    game: document.getElementById('game-screen')
-};
-const btnCreate = document.getElementById('btn-create');
-const btnJoin = document.getElementById('btn-join');
-const inputJoinCode = document.getElementById('join-code');
-const statusText = document.getElementById('status-text');
+// Elements
+const screens = { lobby: document.getElementById('lobby-screen'), game: document.getElementById('game-screen') };
+const uiOpponentHand = document.getElementById('opponent-hand');
+const uiMyHand = document.getElementById('choice-buttons');
+const uiBattleOverlay = document.getElementById('battle-overlay');
+const uiBattleStage = document.getElementById('battle-stage');
+const uiBattleResult = document.getElementById('battle-result');
+const uiFinalScreen = document.getElementById('final-screen');
 
-const uiRoomCode = document.getElementById('current-room-code');
-const uiRole = document.getElementById('my-role');
-const uiOpponentStatus = document.getElementById('opponent-status');
-const uiResultOverlay = document.getElementById('result-overlay');
-const btnReset = document.getElementById('btn-reset'); // Used for Next Round
-const btnExit = document.getElementById('btn-exit');
+// --- BUTTONS ---
 
-// New UI Elements for Card Game
-const uiRound = document.getElementById('round-display'); // Need to add to HTML
-const uiScore = document.getElementById('score-display'); // Need to add to HTML
-const myHandContainer = document.getElementById('choice-buttons');
-const opponentHandContainer = document.getElementById('opponent-hand'); // Need to add to HTML
+// 1. Quick Match
+const btnQuick = document.getElementById('btn-quick-match');
+if (btnQuick) {
+    btnQuick.addEventListener('click', () => {
+        const roomsRef = ref(db, 'rooms');
+        get(roomsRef).then((snapshot) => {
+            let matchFound = null;
+            if (snapshot.exists()) {
+                snapshot.forEach((child) => {
+                    const room = child.val();
+                    if (room.p2 === 'waiting' && room.status !== 'finished') {
+                        matchFound = child.key;
+                        return true;
+                    }
+                });
+            }
+            if (matchFound) joinRoom(matchFound);
+            else createRoom();
+        });
+    });
+}
 
-// [LOBBY] Create Room
-btnCreate.addEventListener('click', () => {
+// 2. Create/Join Manual
+document.getElementById('btn-create').addEventListener('click', createRoom);
+document.getElementById('btn-join').addEventListener('click', () => {
+    const code = document.getElementById('join-code').value;
+    if (code) joinRoom(code);
+});
+document.getElementById('btn-exit').addEventListener('click', () => location.reload());
+document.getElementById('btn-lobby').addEventListener('click', () => location.reload());
+
+// --- ROOM LOGIC ---
+
+function createRoom() {
     const roomId = Math.floor(1000 + Math.random() * 9000).toString();
     const roomRef = ref(db, 'rooms/' + roomId);
+    set(roomRef, {
+        p1: 'joined', p2: 'waiting', status: 'waiting', round: 1, scores: { p1: 0, p2: 0 },
+        p1Hand: [], p2Hand: [], p1Choice: '', p2Choice: ''
+    }).then(() => enterGame(roomId, 'p1'));
+}
 
-    // Initial Room State
-    const initialData = {
-        p1: 'joined',
-        p2: 'waiting',
-        status: 'waiting',
-        round: 1,
-        scores: { p1: 0, p2: 0 },
-        // Hands and Choices are empty initially
-        p1Hand: [],
-        p2Hand: [],
-        p1Choice: '',
-        p2Choice: ''
-    };
-
-    set(roomRef, initialData).then(() => {
-        enterGame(roomId, 'p1');
-    }).catch((err) => {
-        showStatus("Error creating room: " + err.message);
-    });
-});
-
-// [LOBBY] Join Room
-btnJoin.addEventListener('click', () => {
-    const roomId = inputJoinCode.value.trim();
-    if (!roomId) {
-        showStatus("Please enter a room code!");
-        return;
-    }
-
+function joinRoom(roomId) {
     const roomRef = ref(db, 'rooms/' + roomId);
-    get(roomRef).then((snapshot) => {
-        if (snapshot.exists()) {
-            const data = snapshot.val();
-            if (data.p2 === 'waiting') {
-                update(roomRef, { p2: 'joined', status: 'playing' });
-                enterGame(roomId, 'p2');
-            } else {
-                showStatus("Room full or invalid.");
-            }
+    get(roomRef).then((snap) => {
+        if (snap.exists() && snap.val().p2 === 'waiting') {
+            update(roomRef, { p2: 'joined', status: 'playing' });
+            enterGame(roomId, 'p2');
         } else {
-            showStatus("Room not found!");
+            alert("Room full or invalid");
         }
     });
-});
+}
 
-// [GAME] Logic
 function enterGame(roomId, role) {
     currentRoomId = roomId;
     myRole = role;
 
-    screens.lobby.classList.remove('active');
+    screens.lobby.style.display = 'none';
+    screens.game.style.display = 'flex';
     screens.game.classList.add('active');
 
-    uiRoomCode.innerText = roomId;
-    uiRole.innerText = role.toUpperCase();
-    uiRole.style.color = role === 'p1' ? 'var(--primary)' : 'var(--secondary)';
+    document.getElementById('current-room-code').innerText = roomId;
+    const roleBadge = document.getElementById('my-role');
+    roleBadge.innerText = role === 'p1' ? "PLAYER 1" : "PLAYER 2";
+    roleBadge.style.color = role === 'p1' ? 'var(--primary)' : 'var(--secondary)';
 
-    // Listen to updates
-    const roomRef = ref(db, 'rooms/' + roomId);
-    onValue(roomRef, (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
-        updateGameUI(data);
+    onValue(ref(db, 'rooms/' + roomId), (snap) => {
+        const data = snap.val();
+        if (!data) { alert("Room closed"); location.reload(); return; }
+        updateGame(data);
     });
 }
 
-// Hand Generation Logic
-function generateThreeCards() {
-    const types = ['rock', 'paper', 'scissors'];
-    // 90% chance: All different (Unique)
-    // 10% chance: 2 Same, 1 Different
-    // 0% chance: 3 Same
+// --- GAME LOOP ---
 
-    const roll = Math.random();
-    let hand = [];
+function updateGame(data) {
+    if (data.status === 'finished') {
+        showFinalResult(data);
+        return;
+    }
 
-    if (roll < 0.9) {
-        // Unique: R, P, S
-        hand = ['rock', 'paper', 'scissors'];
-    } else {
-        // 2 Duplicates
-        const double = types[Math.floor(Math.random() * 3)];
-        let single = types[Math.floor(Math.random() * 3)];
-        // Ensure single is different from double (no 3 same)
-        while (single === double) {
-            single = types[Math.floor(Math.random() * 3)];
+    // 1. Generate Hands (Host Only)
+    if (myRole === 'p1' && data.status === 'playing' && (!data.p1Hand || data.p1Hand.length === 0)) {
+        if (!isAnimating) {
+            const h1 = generateHand();
+            const h2 = generateHand();
+            update(ref(db, 'rooms/' + currentRoomId), { p1Hand: h1, p2Hand: h2 });
         }
-        hand = [double, double, single];
     }
 
-    // Shuffle the array visually
-    for (let i = hand.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [hand[i], hand[j]] = [hand[j], hand[i]];
-    }
+    // 2. Info
+    document.getElementById('round-display').innerText = `ROUND ${data.round} / ${MAX_ROUNDS}`;
+    document.getElementById('score-display').innerText = `P1: ${data.scores.p1} - P2: ${data.scores.p2}`;
 
-    return hand;
-}
-
-function updateGameUI(data) {
-    // 1. Host Logic: Generate Hands if Round Started but Hands Empty
-    if (myRole === 'p1' && data.status === 'playing' && (!data.p1Hand || !data.p1Hand.length)) {
-        // Generate for BOTH players to ensure fairness/sync
-        const hand1 = generateThreeCards();
-        const hand2 = generateThreeCards();
-
-        update(ref(db, 'rooms/' + currentRoomId), {
-            p1Hand: hand1,
-            p2Hand: hand2
-        });
-    }
-
-    // 2. Score & Round Info
-    if (data.scores) {
-        const p1s = data.scores.p1 || 0;
-        const p2s = data.scores.p2 || 0;
-        const round = data.round || 1;
-
-        // Dynamically find or create these elements if missing (since we haven't updated HTML yet)
-        let roundEl = document.getElementById('round-display');
-        let scoreEl = document.getElementById('score-display');
-
-        if (roundEl) roundEl.innerText = `ROUND ${round} / ${MAX_ROUNDS}`;
-        if (scoreEl) scoreEl.innerText = `P1: ${p1s} - P2: ${p2s}`;
-    }
-
-    // 3. Render Opponent Hand (Hidden or Revealed)
     const opponentRole = myRole === 'p1' ? 'p2' : 'p1';
-    renderOpponentCards(opponentRole, data);
+    const statusEl = document.getElementById('opponent-status');
+    statusEl.innerText = data[opponentRole] === 'joined' ? "READY" : "WAITING...";
+    statusEl.style.color = data[opponentRole] === 'joined' ? "#0f0" : "#888";
 
-    // 4. Render My Hand
-    const myHand = data[myRole + 'Hand'];
-    if (myHand) {
-        renderMyCards(myHand, data[myRole + 'Choice']);
+    // 3. Render Hands (Only if not animating)
+    if (!isAnimating) {
+        renderOpponentHand(data[opponentRole + 'Choice']);
+        if (data[myRole + 'Hand']) renderMyHand(data[myRole + 'Hand'], data[myRole + 'Choice']);
     }
 
-    // 5. Check Result
-    checkResult(data);
+    // 4. Check Battle Trigger
+    if (!isAnimating && data.p1Choice && data.p2Choice) {
+        playBattleAnimation(data);
+    }
 }
 
-function renderOpponentCards(role, data) {
-    let container = document.getElementById('opponent-hand');
-    if (!container) return; // Should exist in new HTML
+function generateHand() {
+    const types = ['rock', 'paper', 'scissors'];
+    if (Math.random() < 0.9) return shuffle(['rock', 'paper', 'scissors']);
 
-    container.innerHTML = '';
+    const d = types[Math.floor(Math.random() * 3)];
+    let s = types[Math.floor(Math.random() * 3)];
+    while (s === d) s = types[Math.floor(Math.random() * 3)];
+    return shuffle([d, d, s]);
+}
+function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
 
-    // Opponent always has 3 cards visually? 
-    // Or do we represent them holding 3 cards?
-    // Let's show 3 Card Backs.
-
-    const choice = data[role + 'Choice'];
-
+function renderOpponentHand(choice) {
+    uiOpponentHand.innerHTML = '';
     for (let i = 0; i < 3; i++) {
-        const card = document.createElement('div');
-        card.className = 'card-back';
-
-        // If opponent Made a choice, maybe highlight one card?
-        // Or simpler: Just show "Ready" status text.
-
-        if (choice !== '') {
-            card.className += ' ready';
-        }
-
-        container.appendChild(card);
+        const div = document.createElement('div');
+        div.className = 'game-card opp-card';
+        if (choice) div.classList.add('ready');
+        div.innerHTML = `<div class="card-face card-front"></div><div class="card-face card-back"></div>`;
+        uiOpponentHand.appendChild(div);
     }
 }
 
-function renderMyCards(hand, myCurrentChoice) {
-    myHandContainer.innerHTML = '';
+function renderMyHand(hand, myChoice) {
+    uiMyHand.innerHTML = '';
+    myCards = hand;
 
-    hand.forEach((type, index) => {
-        const btn = document.createElement('button');
-        btn.className = 'choice-btn';
-        btn.innerText = getIcon(type);
-        btn.dataset.choice = type;
+    hand.forEach(type => {
+        const div = document.createElement('div');
+        div.className = 'game-card my-card';
+        if (myChoice) div.classList.add('disabled');
+        if (myChoice === type) div.classList.add('selected');
 
-        // If I already chose, disable all and highlight chosen
-        if (myCurrentChoice !== '') {
-            btn.disabled = true;
-            if (myCurrentChoice === type) { // Logic issue: if duplicate cards?
-                // We should probably track passing indices, but for simple RPS prototype,
-                // we'll just highlight ALL matching types or the FIRST one?
-                // Let's rely on "locked" state.
-                // Better: Highlight only if it was THE clicked one?
-                // We don't save index in DB, only value. So highlight all matching types.
-                btn.classList.add('selected');
-            } else {
-                btn.style.opacity = '0.3';
-            }
-        } else {
-            // Clickable
-            btn.addEventListener('click', () => {
-                selectCard(type);
-            });
+        div.innerHTML = `<div class="card-face card-front">${getIcon(type)}</div><div class="card-face card-back"></div>`;
+        if (!myChoice) {
+            div.addEventListener('click', () => submitChoice(type));
         }
-
-        myHandContainer.appendChild(btn);
+        uiMyHand.appendChild(div);
     });
 }
 
-function getIcon(type) {
-    if (type === 'rock') return '✊';
-    if (type === 'paper') return '✋';
-    if (type === 'scissors') return '✌️';
-    return '?';
+function submitChoice(type) {
+    if (!currentRoomId) return;
+    update(ref(db, 'rooms/' + currentRoomId), { [myRole + 'Choice']: type });
 }
 
-function selectCard(type) {
-    if (!currentRoomId || !myRole) return;
+function getIcon(t) { return t === 'rock' ? '✊' : (t === 'paper' ? '✋' : '✌️'); }
 
-    const updates = {};
-    updates['rooms/' + currentRoomId + '/' + myRole + 'Choice'] = type;
-    update(ref(db), updates);
-}
+// --- ANIMATION ---
 
-function checkResult(data) {
-    if (data.p1Choice && data.p2Choice) {
-        // Both Selected -> Show Winner
-        const result = determineWinner(data.p1Choice, data.p2Choice);
+function playBattleAnimation(data) {
+    isAnimating = true;
+    uiBattleOverlay.classList.remove('hidden');
+    uiBattleStage.innerHTML = '';
+    uiBattleResult.className = '';
+    uiBattleResult.classList.remove('show');
 
-        uiResultOverlay.classList.remove('hidden');
-        uiResultOverlay.innerText = result === 'draw' ? "DRAW!" :
-            (result === myRole ? "WIN!" : "LOSE!");
+    const myType = data[myRole + 'Choice'];
+    const oppType = data[(myRole === 'p1' ? 'p2' : 'p1') + 'Choice'];
 
-        // Only HOST (P1) handles Round Progression to avoid double count
+    const cardMine = createBattleCard(myType, 'card-p1-start');
+    const cardOpp = createBattleCard(oppType, 'card-p2-start');
+    cardOpp.classList.add('opp-card');
+
+    uiBattleStage.appendChild(cardOpp);
+    uiBattleStage.appendChild(cardMine);
+
+    setTimeout(() => {
+        cardMine.className = 'game-card battle-card card-p1-mid';
+        cardMine.innerHTML = `<div class="card-face card-front" style="background:#003333; border-color:var(--primary);">${getIcon(myType)}</div>`;
+        cardOpp.className = 'game-card battle-card card-p2-mid opp-card';
+    }, 100);
+
+    setTimeout(() => {
+        cardOpp.classList.add('card-p2-reveal');
+        cardOpp.innerHTML = `<div class="card-face card-front" style="background:#330011; border-color:var(--secondary);">${getIcon(oppType)}</div><div class="card-face card-back"></div>`;
+    }, 1000);
+
+    setTimeout(() => {
+        const winner = determineWinner(data.p1Choice, data.p2Choice);
+        let text = "DRAW";
+        let colorClass = "draw-text";
+        if (winner === myRole) { text = "WIN!"; colorClass = "win-text"; }
+        else if (winner !== 'draw') { text = "LOSE"; colorClass = "lose-text"; }
+
+        uiBattleResult.innerText = text;
+        uiBattleResult.classList.add(colorClass);
+        uiBattleResult.classList.add('show');
+
         if (myRole === 'p1') {
-            // Wait 3 seconds then Next Round
-            if (!window.roundTimer) {
-                window.roundTimer = setTimeout(() => {
-                    nextRound(result, data);
-                    window.roundTimer = null;
-                }, 3000);
-            }
+            setTimeout(() => nextRound(winner, data), 1500);
         }
-    } else {
-        uiResultOverlay.classList.add('hidden');
-    }
+    }, 1800);
+}
+
+function createBattleCard(type, startClass) {
+    const div = document.createElement('div');
+    div.className = `game-card battle-card ${startClass}`;
+    return div;
 }
 
 function determineWinner(p1, p2) {
     if (p1 === p2) return 'draw';
-    if ((p1 === 'rock' && p2 === 'scissors') ||
-        (p1 === 'paper' && p2 === 'rock') ||
-        (p1 === 'scissors' && p2 === 'paper')) {
-        return 'p1';
-    }
+    if ((p1 === 'rock' && p2 === 'scissors') || (p1 === 'paper' && p2 === 'rock') || (p1 === 'scissors' && p2 === 'paper')) return 'p1';
     return 'p2';
 }
 
-function nextRound(roundWinner, data) {
+function nextRound(winner, data) {
+    let nextR = data.round + 1;
+    let scores = data.scores;
+    if (winner === 'p1') scores.p1++;
+    if (winner === 'p2') scores.p2++;
+
     const updates = {};
-    let newRound = data.round + 1;
-    let scores = data.scores || { p1: 0, p2: 0 };
+    updates['scores'] = scores;
 
-    if (roundWinner === 'p1') scores.p1++;
-    if (roundWinner === 'p2') scores.p2++;
-
-    updates['rooms/' + currentRoomId + '/scores'] = scores;
-
-    if (newRound > MAX_ROUNDS) {
-        // Game Over
-        updates['rooms/' + currentRoomId + '/status'] = 'finished';
-        updates['rooms/' + currentRoomId + '/finalWinner'] = scores.p1 > scores.p2 ? 'p1' : (scores.p2 > scores.p1 ? 'p2' : 'draw');
+    if (nextR > MAX_ROUNDS) {
+        updates['status'] = 'finished';
+        updates['finalWinner'] = scores.p1 > scores.p2 ? 'p1' : (scores.p2 > scores.p1 ? 'p2' : 'draw');
     } else {
-        // Next Round Setup
-        updates['rooms/' + currentRoomId + '/round'] = newRound;
-        updates['rooms/' + currentRoomId + '/p1Choice'] = '';
-        updates['rooms/' + currentRoomId + '/p2Choice'] = '';
-        updates['rooms/' + currentRoomId + '/p1Hand'] = []; // Clear to trigger regeneration
-        updates['rooms/' + currentRoomId + '/p2Hand'] = [];
+        updates['round'] = nextR;
+        updates['p1Choice'] = ''; updates['p2Choice'] = '';
+        updates['p1Hand'] = []; updates['p2Hand'] = [];
     }
+    update(ref(db, 'rooms/' + currentRoomId), updates);
+}
 
-    update(ref(db), updates);
+function showFinalResult(data) {
+    uiBattleOverlay.classList.add('hidden');
+    screens.game.style.display = 'none';
+    uiFinalScreen.classList.remove('hidden');
+
+    const meWin = (data.finalWinner === myRole);
+    const draw = (data.finalWinner === 'draw');
+    const title = document.getElementById('final-msg');
+
+    if (draw) { title.innerText = "DRAW GAME"; title.style.color = "#fff"; }
+    else if (meWin) { title.innerText = "VICTORY!"; title.style.color = "var(--primary)"; }
+    else { title.innerText = "DEFEAT"; title.style.color = "var(--secondary)"; }
+
+    document.getElementById('final-score').innerText = `Final Score: ${data.scores.p1} - ${data.scores.p2}`;
+    isAnimating = false;
 }

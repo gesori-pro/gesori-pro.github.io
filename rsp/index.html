@@ -3,11 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Neon RPS: Card Battle</title>
-    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -24,51 +25,50 @@
         <div class="scoreboard">
             <div id="round-display">ROUND 1 / 3</div>
             <div id="score-display">P1: 0 - P2: 0</div>
-            <div id="status-text">Waiting...</div>
+            <div id="status-text">...</div>
         </div>
 
         <!-- Lobby Section -->
         <div id="lobby-screen" class="screen active">
             <div class="card">
-                <h2>Game Lobby</h2>
+                <h2 class="neon-text">GAME LOBBY</h2>
+                <br>
+                <!-- Quick Match Button -->
+                <button id="btn-quick-match" class="neon-btn primary" style="font-size: 1.2rem; padding: 20px;">⚡ QUICK
+                    MATCH</button>
+
+                <div class="separator" style="margin: 20px 0; opacity: 0.5;">- Custom Room -</div>
+
                 <div class="btn-group">
-                    <button id="btn-create" class="neon-btn primary">Create Room</button>
-                    <div class="separator">- OR -</div>
-                    <input type="text" id="join-code" placeholder="Room Code">
-                    <button id="btn-join" class="neon-btn secondary">Join Room</button>
+                    <button id="btn-create" class="neon-btn secondary">Create Private</button>
+                    <div style="display: flex; gap: 5px; width: 100%; justify-content: center; margin-top: 5px;">
+                        <input type="text" id="join-code" placeholder="Code">
+                        <button id="btn-join" class="neon-btn secondary" style="width: auto; margin:0;">JOIN</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Game Section (Top vs Bottom) -->
+        <!-- Game Section -->
         <div id="game-screen" class="screen">
-
-            <!-- OPPONENT ZONE (TOP) -->
+            <!-- OPPONENT ZONE -->
             <div class="zone opponent-zone">
                 <div class="avatar-wrapper">
                     <div class="avatar p2-color">OPP</div>
-                    <div id="opponent-status">Waiting...</div>
+                    <div id="opponent-status">...</div>
                 </div>
-                <!-- Opponent's Hand (Hidden Cards) -->
-                <div id="opponent-hand" class="hand-container compact">
-                    <div class="card-back"></div>
-                    <div class="card-back"></div>
-                    <div class="card-back"></div>
+                <div id="opponent-hand" class="hand-container">
+                    <!-- Opponent Cards (Hidden) -->
                 </div>
             </div>
 
             <div class="vs-divider">VS</div>
 
-            <!-- PLAYER ZONE (BOTTOM) -->
+            <!-- PLAYER ZONE -->
             <div class="zone player-zone">
-                <!-- Result Overlay (Appears on top of cards) -->
-                <div id="result-overlay" class="result-msg hidden">WIN!</div>
-
-                <!-- My Hand (Interactive Cards) -->
                 <div id="choice-buttons" class="hand-container">
-                    <!-- Buttons injected by JS -->
+                    <!-- My Cards (Interactive) -->
                 </div>
-
                 <div class="avatar-wrapper bottom">
                     <div class="avatar p1-color">YOU</div>
                     <div id="my-role" class="role-badge">---</div>
@@ -76,13 +76,28 @@
             </div>
 
             <div class="controls">
-                <button id="btn-exit" class="neon-btn danger">Exit</button>
+                <button id="btn-exit" class="neon-btn danger">EXIT</button>
             </div>
         </div>
+
+        <!-- BATTLE OVERLAY (Animation) -->
+        <div id="battle-overlay" class="hidden">
+            <div id="battle-result">WIN!</div>
+            <div id="battle-stage">
+                <!-- Cards injected here -->
+            </div>
+        </div>
+
+        <!-- FINAL RESULT SCREEN -->
+        <div id="final-screen" class="hidden">
+            <h1 class="neon-text final-title" id="final-msg">YOU WON!</h1>
+            <div id="final-score" style="color:#aaa; margin-bottom: 30px;">Score: 2 - 1</div>
+            <button id="btn-lobby" class="neon-btn primary">BACK TO LOBBY</button>
+        </div>
+
     </div>
 
-    <!-- Firebase SDK & Game Logic -->
-    <!-- Note: These match the filenames you uploaded to GitHub -->
+    <!-- JS -->
     <script type="module" SRC="fire.js"></script>
     <script type="module" SRC="game.js"></script>
 
